@@ -17,13 +17,18 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      len: [10, 20], //password must be between 10 and 20 characters
+      len: [10, 20],
     },
   },
 
   refreshToken: {
     type: DataTypes.STRING,
-    allowNull: true, // allow null for users without a refresh token
+    allowNull: true,
+  },
+
+  emailVerified: {
+    DataTypes: Boolean,
+    defaultValue: false,
   },
 });
 

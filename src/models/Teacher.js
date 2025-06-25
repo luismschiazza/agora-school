@@ -14,16 +14,14 @@ const Teacher = sequelize.define('Teacher', {
 
   photo: {
     type: DataTypes.STRING,
-    allowNull: true, // allow null for teachers without a photo
+    allowNull: true,
   },
 
   office: {
-    type: DataTypes.STRING, // ex: 'secretary', 'coordinator, ', 'none'
-    allowNull: true, // allow null for teachers without an office
+    type: DataTypes.STRING,
+    allowNull: true,
     defaultValue: 'Teacher',
   },
 });
 
 module.exports = Teacher;
-// Note: The 'photo' field is optional and can be used to store a URL or path to the teacher's photo.
-// The 'office' field can be used to specify the teacher's office role, with a default value of 'Teacher'.

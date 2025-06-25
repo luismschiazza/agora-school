@@ -1,8 +1,9 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/User');
-const { generateToken } = require('../services/tokenService');
+const sendEmail = require('../utils/mailer');
+const { generateEmailToken } = require('../utils/vereficationToken');
+const { generateTokens } = require('../services/tokenService');
 
 require('dotenv').config();
 
@@ -22,7 +23,22 @@ exports.register = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    const token = generateToken(newUser.id, newUser.email);
+    const { accessToken, refreshToken } = generateTokens({ id: newUser.id, email: newUser.email });
+    await newUser.update({ refreshToken });
+
+    const emailToken = generateEmailToken({
+      id: newUser.id,
+      email: newUser.email,
+    });
+
+    const verifyUrl = `http://localhost:3000/verify-email?token=${emailToken}`;
+
+    await sendEmail({
+      to: newUser.email,
+      subject: 'Confirm your account, please.',
+      html: `<p>Confirm your account clicking <a href="${verifyUrl}">HERE</a>.</p>`,
+    });
+
     res.status(201).json({
       message: 'User registered successfully!',
       user: {
@@ -30,7 +46,8 @@ exports.register = async (req, res, next) => {
         username: newUser.username,
         email: newUser.email,
       },
-      token,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -42,14 +59,23 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email } });
-    const isPasswordValid = user && (await bcrypt.compare(password, user.password));
 
-    if (!user && !isPasswordValid) {
+    if (!user) {
       return res.status(401).json({ message: 'Invalid email or password! Try again!' });
     }
 
-    const token = generateToken({ id: user.id });
-    await user.update({ lastLogin: new Date() });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid email or password! Try again!' });
+    }
+
+    if (!user.emailVerified) {
+      return res.status(403).json({ message: 'Email not verified. Please check your inbox.' });
+    }
+
+    const { accessToken, refreshToken } = generateTokens({ id: user.id, email: user.email });
+    await user.update({ lastLogin: new Date(), refreshToken });
+
     res.status(200).json({
       message: 'Login successful!',
       user: {
@@ -57,7 +83,8 @@ exports.login = async (req, res, next) => {
         username: user.username,
         email: user.email,
       },
-      token,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -67,7 +94,11 @@ exports.login = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
-    // Invalidate the token on the client side
+    const userId = req.User?.id;
+    if (userId) {
+      await User.update({ refreshToken: null }, { where: { id: req.user.id } });
+    }
+
     res.status(200).json({ message: 'Logout successful!' });
   } catch (error) {
     console.error('Logout error:', error);
@@ -78,22 +109,27 @@ exports.logout = async (req, res, next) => {
 exports.refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
-    const user = await User.findOne({ where: { refreshToken } });
-    const tokenRefresh = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
-    if (!refreshToken || !user) {
-      return res.status(401).json({ message: 'Invalid refresh token or user!' });
-    }
-    if (user.id !== tokenRefresh.id) {
-      return res.status(403).json({ message: 'Forbidden: Invalid user for this token!' });
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'No refresh token provided' });
     }
 
-    const token = generateToken({ id: user.id });
-    await user.update({ refreshToken: token.refreshToken });
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const user = await User.findByPk(decoded.id);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens({
+      id: user.id,
+      email: user.email,
+    });
+    await user.update({ refreshToken: newRefreshToken });
 
     res.status(200).json({
       message: 'Token refreshed successfully!',
-      token: token.accessToken,
+      accessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     console.error('Refresh token error:', error);

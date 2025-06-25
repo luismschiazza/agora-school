@@ -5,20 +5,19 @@ const Subject = sequelize.define('Subject', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // ensure subject name is unique
+    unique: true,
   },
 
   code: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // ensure subject code is unique
+    unique: true,
   },
 
   description: {
     type: DataTypes.TEXT,
-    allowNull: true, // allow null for subjects without a description
+    allowNull: true,
   },
 });
 
 module.exports = Subject;
-// Note: The 'description' field is optional and can be used to provide additional information about the subject.

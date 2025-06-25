@@ -10,14 +10,13 @@ const Student = sequelize.define('Student', {
   enrollment: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // ensure enrollment number is unique
+    unique: true,
   },
 
   photo: {
     type: DataTypes.STRING,
-    allowNull: true, // allow null for students without a photo
+    allowNull: true,
   },
 });
 
 module.exports = Student;
-// Note: The 'photo' field is optional and can be used to store a URL or path to the student's photo.

@@ -5,29 +5,28 @@ const DevPlan = sequelize.define('DevPlan', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // ensure development plan name is unique
+    unique: true,
   },
 
   description: {
     type: DataTypes.TEXT,
-    allowNull: true, // allow null for plans without a description
+    allowNull: true,
   },
 
   startDate: {
     type: DataTypes.DATE,
-    allowNull: false, // start date is required
+    allowNull: false,
   },
 
   endDate: {
     type: DataTypes.DATE,
-    allowNull: false, // end date is required
+    allowNull: false,
   },
 
   status: {
     type: DataTypes.ENUM('active', 'completed', 'archived'),
-    defaultValue: 'active', // default status is active
+    defaultValue: 'active',
   },
 });
 
 module.exports = DevPlan;
-// Note: The 'description' field is optional and can be used to provide additional information about the development plan.

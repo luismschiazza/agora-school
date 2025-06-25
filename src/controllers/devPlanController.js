@@ -1,10 +1,8 @@
-// controllers/developmentPlanController.js
 const { DevelopmentPlan } = require('../models');
 
 const createDevelopmentPlan = async (req, res) => {
   try {
     const { title, description, teacherId, status } = req.body;
-    // status pode ser algo tipo 'pending', 'in progress', 'completed'
 
     const developmentPlan = await DevelopmentPlan.create({
       title,

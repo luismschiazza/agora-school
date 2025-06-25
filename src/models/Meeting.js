@@ -4,29 +4,28 @@ const sequelize = require('../config/db');
 const Meeting = sequelize.define('Meeting', {
   title: {
     type: DataTypes.STRING,
-    allowNull: false, // title is required
+    allowNull: false,
   },
 
   date: {
     type: DataTypes.DATE,
-    allowNull: false, // date is required
+    allowNull: false,
   },
 
   time: {
     type: DataTypes.TIME,
-    allowNull: false, // time is required
+    allowNull: false,
   },
 
   location: {
     type: DataTypes.STRING,
-    allowNull: true, // allow null for meetings without a specific location
+    allowNull: true,
   },
 
   agenda: {
     type: DataTypes.TEXT,
-    allowNull: true, // allow null for meetings without an agenda
+    allowNull: true,
   },
 });
 
 module.exports = Meeting;
-// Note: The 'location' and 'agenda' fields are optional and can be used to provide additional information about the meeting.

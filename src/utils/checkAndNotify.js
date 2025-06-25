@@ -38,3 +38,5 @@ const checkAndNotify = async () => {
     }
   }
 };
+
+module.exports = checkAndNotify;

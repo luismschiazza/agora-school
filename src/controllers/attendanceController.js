@@ -49,7 +49,7 @@ const deleteAttendance = async (req, res) => {
   try {
     const attendance = await Attendance.findByPk(req.params.id);
     if (!attendance) return res.status(404).json({ message: 'Attendance not found' });
-    await attendance.destroy(); // Pode fazer hard delete aqui, pois geralmente registros de presença são históricos
+    await attendance.destroy();
     res.json({ message: 'Attendance deleted' });
   } catch (err) {
     console.error('Delete Attendance Error:', err);
