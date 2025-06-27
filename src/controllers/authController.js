@@ -94,7 +94,7 @@ exports.login = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
-    const userId = req.User?.id;
+    const userId = req.user?.id;
     if (userId) {
       await User.update({ refreshToken: null }, { where: { id: req.user.id } });
     }

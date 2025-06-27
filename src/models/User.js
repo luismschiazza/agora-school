@@ -27,7 +27,7 @@ const User = sequelize.define('User', {
   },
 
   emailVerified: {
-    DataTypes: Boolean,
+    type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
 });
